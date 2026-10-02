@@ -71,15 +71,23 @@
             transition: opacity 0.05s ease-out;
         }
 
-        /* Flashbang Video / Visual Animation Layer */
-        .flash-video-container {
-            mix-blend-mode: screen;
-        }
 
         /* Countdown Number Animation */
         .countdown-num {
             transform-origin: center center;
             text-shadow: 0 0 20px rgba(239, 68, 68, 0.8), 0 0 40px rgba(239, 68, 68, 0.4);
+        }
+
+        video{
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            object-fit: cover !important;
+            mix-blend-mode: multiply !important;
         }
     </style>
 </head>
@@ -146,7 +154,7 @@
     </div>
 
     <!-- Full-Screen Flashbang Visual Effect Overlay -->
-    <div id="flash-screen" class="fixed inset-0 z-50 bg-white flex items-center justify-center">
+    <div id="flash-screen" class="fixed inset-0 z-50 flex items-center justify-center">
 
 <video
     id="flash-video"
@@ -156,8 +164,6 @@
   poster="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQAAAAA3iMLMAAAAAXNSR0IArs4c6QAAAA5JREFUeNpj+P+fgRQEAP1OH+HeyHWXAAAAAElFTkSuQmCC"
   src="data:video/mp4;base64,AAAAHGZ0eXBpc29tAAACAGlzb21pc28ybXA0MQAAAAhmcmVlAAAAvG1kYXQAAAAfTgEFGkdWStxcTEM/lO/FETzRQ6gD7gAA7gIAA3EYgAAAAEgoAa8iNjAkszOL+e58c//cEe//0TT//scp1n/381P/RWP/zOW4QtxorfVogeh8nQDbQAAAAwAQMCcWUTAAAAMAAAMAAAMA84AAAAAVAgHQAyu+KT35E7gAADFgAAADABLQAAAAEgIB4AiS76MTkNbgAAF3AAAPSAAAABICAeAEn8+hBOTXYAADUgAAHRAAAAPibW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAAAKcAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAw10cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAAAKcAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAABAAAAAQAAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEAAACnAAAAAAABAAAAAAKFbWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAABdwAAAD6BVxAAAAAAAMWhkbHIAAAAAAAAAAHZpZGUAAAAAAAAAAAAAAABDb3JlIE1lZGlhIFZpZGVvAAAAAixtaW5mAAAAFHZtaGQAAAABAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAHsc3RibAAAARxzdHNkAAAAAAAAAAEAAAEMaHZjMQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAQABAASAAAAEgAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABj//wAAAHVodmNDAQIgAAAAsAAAAAAAPPAA/P36+gAACwOgAAEAGEABDAH//wIgAAADALAAAAMAAAMAPBXAkKEAAQAmQgEBAiAAAAMAsAAAAwAAAwA8oBQgQcCTDLYgV7kWVYC1CRAJAICiAAEACUQBwChkuNBTJAAAAApmaWVsAQAAAAATY29scm5jbHgACQAQAAkAAAAAEHBhc3AAAAABAAAAAQAAABRidHJ0AAAAAAAALPwAACz8AAAAKHN0dHMAAAAAAAAAAwAAAAIAAAPoAAAAAQAAAAEAAAABAAAD6AAAABRzdHNzAAAAAAAAAAEAAAABAAAAEHNkdHAAAAAAIBAQGAAAAChjdHRzAAAAAAAAAAMAAAABAAAAAAAAAAEAAAfQAAAAAgAAAAAAAAAcc3RzYwAAAAAAAAABAAAAAQAAAAQAAAABAAAAJHN0c3oAAAAAAAAAAAAAAAQAAABvAAAAGQAAABYAAAAWAAAAFHN0Y28AAAAAAAAAAQAAACwAAABhdWR0YQAAAFltZXRhAAAAAAAAACFoZGxyAAAAAAAAAABtZGlyYXBwbAAAAAAAAAAAAAAAACxpbHN0AAAAJKl0b28AAAAcZGF0YQAAAAEAAAAATGF2ZjYwLjMuMTAw"
 ></video>
-        <!-- Intense Radial Bloom Glow -->
-        <div class="absolute inset-0 bg-radial from-white via-amber-100 to-white opacity-90"></div>
     </div>
 
     <!-- Javascript Physics & Logic -->
@@ -275,7 +281,6 @@
         const grenade = document.getElementById('grenade-sprite');
         const countdownText = document.getElementById('countdown-text');
         const flashScreen = document.getElementById('flash-screen');
-        const flashVideo = document.getElementById('flash-video');
 
         // Physics State
         let posX = 0;
@@ -435,10 +440,6 @@
 
             // Play Web Audio Sound Effects
             playFlashbangSound();
-
-            // Try playing background video inside flash overlay
-            flashVideo.play().catch(() => {});
-
             // Bring Flash overlay to 1.0 full opacity immediately
             flashScreen.style.transition = 'opacity 0.02s ease-in';
             flashScreen.style.opacity = '1.0';
@@ -461,8 +462,6 @@
 
         // Reset Experience back to initial clean state
         function resetToInitialState() {
-            flashVideo.pause();
-
             // Clear Grenade position
             grenade.style.transform = 'none';
 
