@@ -1,0 +1,481 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Tactical Flashbang Experience</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #0b0f19;
+            color: #ffffff;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Tactical Background with Overlay */
+        .bg-tactical {
+            background-image: linear-gradient(rgba(11, 15, 25, 0.25), rgba(11, 15, 25, 0.15)), url('/cs2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+
+        /* Glowing Button Styles */
+        .btn-flashbang {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(185, 28, 28, 0.4));
+            border: 2px solid #ef4444;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5), inset 0 0 15px rgba(239, 68, 68, 0.3);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-flashbang:hover {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.4), rgba(220, 38, 38, 0.7));
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+            letter-spacing: 0.2em;
+        }
+
+        .btn-flashbang:active {
+            transform: scale(0.98);
+        }
+
+        /* Invisible Floor Line Indicator ( subtle tactical line ) */
+        .floor-line {
+            position: absolute;
+            top: 60vh;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.15), transparent);
+            pointer-events: none;
+        }
+
+        /* Flashbang Detonation Blinding Layer */
+        #flash-screen {
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.05s ease-out;
+        }
+
+        /* Flashbang Video / Visual Animation Layer */
+        .flash-video-container {
+            mix-blend-mode: screen;
+        }
+
+        /* Countdown Number Animation */
+        .countdown-num {
+            transform-origin: center center;
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.8), 0 0 40px rgba(239, 68, 68, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-tactical h-screen w-screen relative overflow-hidden select-none">
+
+    <!-- Tactical Floor Marker (50vh) -->
+    <div class="floor-line"></div>
+
+    <!-- Central Interactive Area -->
+    <div id="ui-container" class="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none">
+        <!-- Trigger Button -->
+        <button id="flash-btn" class="btn-flashbang pointer-events-auto px-8 py-4 rounded-lg orbitron text-xl md:text-2xl font-black tracking-widest uppercase text-red-100 flex items-center space-x-3 cursor-pointer">
+            <svg class="w-6 h-6 text-red-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-6z"></path>
+            </svg>
+            <span>flashbang me</span>
+        </button>
+    </div>
+
+    <!-- Flashbang Grenade Sprite Container -->
+    <div id="grenade-sprite" class="absolute top-0 left-0 w-16 h-32 pointer-events-none z-20 hidden" style="will-change: transform;">
+        <!-- Detailed M84 Flashbang SVG -->
+        <svg viewBox="0 0 80 160" class="w-full h-full drop-shadow-[0_10px_10px_rgba(0,0,0,0.7)]">
+            <defs>
+                <linearGradient id="metalBody" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#3a3f47"/>
+                    <stop offset="30%" stop-color="#6b7280"/>
+                    <stop offset="70%" stop-color="#4b5563"/>
+                    <stop offset="100%" stop-color="#1f2937"/>
+                </linearGradient>
+                <linearGradient id="leverMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#d1d5db"/>
+                    <stop offset="50%" stop-color="#9ca3af"/>
+                    <stop offset="100%" stop-color="#4b5563"/>
+                </linearGradient>
+            </defs>
+            <!-- Fuse & Top Cap -->
+            <rect x="34" y="10" width="12" height="18" fill="url(#metalBody)" rx="2"/>
+            <!-- Pull Ring -->
+            <circle cx="20" cy="22" r="10" stroke="#d1d5db" stroke-width="3" fill="none"/>
+            <path d="M28 22 L34 22" stroke="#d1d5db" stroke-width="3"/>
+            <!-- Safety Lever ( Spoon ) -->
+            <path d="M42 16 C 58 18, 62 35, 58 85 L 52 85 C 55 45, 52 24, 42 22 Z" fill="url(#leverMetal)"/>
+            <!-- Main Cylinder Body -->
+            <rect x="20" y="28" width="40" height="110" fill="url(#metalBody)" rx="6"/>
+            <!-- Vent Holes (6 Holes typical for M84 Stun Grenade) -->
+            <circle cx="30" cy="48" r="4" fill="#111827"/>
+            <circle cx="50" cy="48" r="4" fill="#111827"/>
+            <circle cx="30" cy="72" r="4" fill="#111827"/>
+            <circle cx="50" cy="72" r="4" fill="#111827"/>
+            <circle cx="30" cy="96" r="4" fill="#111827"/>
+            <circle cx="50" cy="96" r="4" fill="#111827"/>
+            <!-- Tactical Identification Stripes -->
+            <rect x="20" y="112" width="40" height="6" fill="#f59e0b"/>
+            <rect x="20" y="122" width="40" height="4" fill="#dc2626"/>
+            <!-- Bottom Cap -->
+            <rect x="24" y="138" width="32" height="8" fill="#111827" rx="2"/>
+        </svg>
+    </div>
+
+    <!-- Countdown Text Container (~75vh) -->
+    <div id="countdown-container" class="absolute top-[72vh] left-0 right-0 flex items-center justify-center z-20 pointer-events-none">
+        <span id="countdown-text" class="orbitron countdown-num text-8xl md:text-9xl font-black text-black opacity-0 scale-150"></span>
+    </div>
+
+    <!-- Full-Screen Flashbang Visual Effect Overlay -->
+    <div id="flash-screen" class="fixed inset-0 z-50 bg-white flex items-center justify-center">
+
+<video
+    id="flash-video"
+  muted
+  autoplay
+  playsinline
+  poster="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQAAAAA3iMLMAAAAAXNSR0IArs4c6QAAAA5JREFUeNpj+P+fgRQEAP1OH+HeyHWXAAAAAElFTkSuQmCC"
+  src="data:video/mp4;base64,AAAAHGZ0eXBpc29tAAACAGlzb21pc28ybXA0MQAAAAhmcmVlAAAAvG1kYXQAAAAfTgEFGkdWStxcTEM/lO/FETzRQ6gD7gAA7gIAA3EYgAAAAEgoAa8iNjAkszOL+e58c//cEe//0TT//scp1n/381P/RWP/zOW4QtxorfVogeh8nQDbQAAAAwAQMCcWUTAAAAMAAAMAAAMA84AAAAAVAgHQAyu+KT35E7gAADFgAAADABLQAAAAEgIB4AiS76MTkNbgAAF3AAAPSAAAABICAeAEn8+hBOTXYAADUgAAHRAAAAPibW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAAAKcAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAw10cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAAAKcAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAABAAAAAQAAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEAAACnAAAAAAABAAAAAAKFbWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAABdwAAAD6BVxAAAAAAAMWhkbHIAAAAAAAAAAHZpZGUAAAAAAAAAAAAAAABDb3JlIE1lZGlhIFZpZGVvAAAAAixtaW5mAAAAFHZtaGQAAAABAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAHsc3RibAAAARxzdHNkAAAAAAAAAAEAAAEMaHZjMQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAQABAASAAAAEgAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABj//wAAAHVodmNDAQIgAAAAsAAAAAAAPPAA/P36+gAACwOgAAEAGEABDAH//wIgAAADALAAAAMAAAMAPBXAkKEAAQAmQgEBAiAAAAMAsAAAAwAAAwA8oBQgQcCTDLYgV7kWVYC1CRAJAICiAAEACUQBwChkuNBTJAAAAApmaWVsAQAAAAATY29scm5jbHgACQAQAAkAAAAAEHBhc3AAAAABAAAAAQAAABRidHJ0AAAAAAAALPwAACz8AAAAKHN0dHMAAAAAAAAAAwAAAAIAAAPoAAAAAQAAAAEAAAABAAAD6AAAABRzdHNzAAAAAAAAAAEAAAABAAAAEHNkdHAAAAAAIBAQGAAAAChjdHRzAAAAAAAAAAMAAAABAAAAAAAAAAEAAAfQAAAAAgAAAAAAAAAcc3RzYwAAAAAAAAABAAAAAQAAAAQAAAABAAAAJHN0c3oAAAAAAAAAAAAAAAQAAABvAAAAGQAAABYAAAAWAAAAFHN0Y28AAAAAAAAAAQAAACwAAABhdWR0YQAAAFltZXRhAAAAAAAAACFoZGxyAAAAAAAAAABtZGlyYXBwbAAAAAAAAAAAAAAAACxpbHN0AAAAJKl0b28AAAAcZGF0YQAAAAEAAAAATGF2ZjYwLjMuMTAw"
+></video>
+        <!-- Intense Radial Bloom Glow -->
+        <div class="absolute inset-0 bg-radial from-white via-amber-100 to-white opacity-90"></div>
+    </div>
+
+    <!-- Javascript Physics & Logic -->
+    <script>
+        // Web Audio API Setup
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Synthesizer for Muffled Pop + High Pitched Tinnitus Ringing
+        function playFlashbangSound() {
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+
+            // 1. Muffled Pop/Explosion Sound
+            const popOsc = audioCtx.createOscillator();
+            const popGain = audioCtx.createGain();
+            const popFilter = audioCtx.createBiquadFilter();
+
+            popOsc.type = 'sine';
+            popOsc.frequency.setValueAtTime(120, now);
+            popOsc.frequency.exponentialRampToValueAtTime(30, now + 0.25);
+
+            popFilter.type = 'lowpass';
+            popFilter.frequency.setValueAtTime(200, now);
+
+            popGain.gain.setValueAtTime(1.0, now);
+            popGain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+
+            popOsc.connect(popFilter);
+            popFilter.connect(popGain);
+            popGain.connect(audioCtx.destination);
+
+            popOsc.start(now);
+            popOsc.stop(now + 0.3);
+
+            // Noise burst for thud effect
+            const bufferSize = audioCtx.sampleRate * 0.2;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+            const noiseFilter = audioCtx.createBiquadFilter();
+            noiseFilter.type = 'bandpass';
+            noiseFilter.frequency.value = 400;
+
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(0.8, now);
+            noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+            noise.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+
+            noise.start(now);
+
+            // 2. High Pitched Tinnitus Ringing (Ear-ring sound)
+            const ringOsc = audioCtx.createOscillator();
+            const ringGain = audioCtx.createGain();
+
+            ringOsc.type = 'sine';
+
+            // google says it's 2600hz in cs2 but like 3000 sounds right??
+            ringOsc.frequency.setValueAtTime(3000, now); //  high pitch ringing
+
+            // Envelope: Sudden onset, sustained bright tone, long decay
+            ringGain.gain.setValueAtTime(0.0, now);
+            ringGain.gain.linearRampToValueAtTime(0.35, now + 0.05); // Rapid swell
+            ringGain.gain.setValueAtTime(0.35, now + 0.8);          // Hold
+            ringGain.gain.exponentialRampToValueAtTime(0.0001, now + 3.8); // Fade out over 3s
+
+            ringOsc.connect(ringGain);
+            ringGain.connect(audioCtx.destination);
+
+            ringOsc.start(now);
+            ringOsc.stop(now + 2.9);
+        }
+
+        // Mechanical Pin Pull Click Sound
+        function playPinSound() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(200, now);
+            osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
+
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.05);
+        }
+
+        // Elements
+        const flashBtn = document.getElementById('flash-btn');
+        const grenade = document.getElementById('grenade-sprite');
+        const countdownText = document.getElementById('countdown-text');
+        const flashScreen = document.getElementById('flash-screen');
+        const flashVideo = document.getElementById('flash-video');
+
+        // Physics State
+        let posX = 0;
+        let posY = 0;
+        let velX = 0;
+        let velY = 0;
+        let angle = 0;
+        let velAngle = 0;
+        const gravity = 0.95;
+        const bounceDamping = 0.85; // Realistic velocity restitution
+        const friction = 0.96;
+        let floorY = 0;
+        let animFrameId = null;
+        let isSimulating = false;
+
+        // Start Flashbang Trigger
+        flashBtn.addEventListener('click', () => {
+            initAudio();
+            playPinSound();
+
+            // Hide Button smoothly
+            flashBtn.style.opacity = '0';
+            flashBtn.style.pointerEvents = 'none';
+
+            setTimeout(() => {
+                startGrenadeDrop();
+            }, 150);
+        });
+
+        function startGrenadeDrop() {
+            // Setup Initial Position above viewport
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+
+            floorY = screenHeight * 0.60 - 110; // Invisible floor at 50vh minus height of sprite
+
+            posX = screenWidth / 2 - 32; // Center horizontally
+            posY = -140; // Start above top of viewport ($y < 0$)
+
+            velX = (Math.random() - 0.5) * 2; // Random slight toss sideways
+            velY = 2; // Initial downward pull
+            angle = -30 + Math.random() * 60;
+            velAngle = (Math.random() - 0.5) * 12;
+
+            grenade.classList.remove('hidden');
+            isSimulating = true;
+
+            // Start Countdown Sequence concurrently
+            runCountdownSequence();
+
+            // Run Physics Animation Loop
+            lastTime = performance.now();
+            requestAnimationFrame(updatePhysics);
+        }
+
+        let lastTime = 0;
+        function updatePhysics(timestamp) {
+            if (!isSimulating) return;
+
+            // Apply Gravity
+            velY += gravity;
+
+            // Update Position
+            posY += velY;
+            posX += velX;
+            angle += velAngle;
+
+            // Check Floor Collision (Invisible floor at 50vh)
+            if (posY >= floorY) {
+                posY = floorY; // Clamp to floor
+                velY = -velY * bounceDamping; // Bounce with damping
+                velX *= friction; // Floor friction
+                velAngle *= 0.6; // Angular damping on impact
+
+                // Play soft thud sound on hard bounce
+                if (Math.abs(velY) > 2) {
+                    playBounceThud(Math.abs(velY));
+                }
+
+                // Settle condition
+                if (Math.abs(velY) < 0.5) {
+                    velY = 0;
+                }
+            }
+
+            // Boundary checks for horizontal walls
+            if (posX < 20 || posX > window.innerWidth - 80) {
+                velX = -velX * 0.7;
+            }
+
+            // Render transform
+            grenade.style.transform = `translate3d(${posX}px, ${posY}px, 0px) rotate(${angle}deg)`;
+
+            animFrameId = requestAnimationFrame(updatePhysics);
+        }
+
+        // Gentle Bounce Audio Feedback
+        function playBounceThud(intensity) {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(30, now + 0.08);
+
+            gain.gain.setValueAtTime(Math.min(intensity * 0.25, 0.5), now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.08);
+        }
+
+        // Countdown visual sequence (3, 2, 1)
+        function runCountdownSequence() {
+            const numbers = ['3', '2', '1'];
+            let step = 0;
+
+            function showNextNumber() {
+                if (step < numbers.length) {
+                    const num = numbers[step];
+                    countdownText.textContent = num;
+
+                    // Reset CSS animation states
+                    countdownText.style.transition = 'none';
+                    countdownText.style.opacity = '1';
+                    countdownText.style.transform = 'scale(2.6)';
+
+                    // Force Reflow
+                    void countdownText.offsetWidth;
+
+                    // Animate shrink and fade out
+                    countdownText.style.transition = 'all 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.2s';
+                    countdownText.style.opacity = '0';
+                    countdownText.style.transform = 'scale(0.4)';
+
+                    step++;
+                    setTimeout(showNextNumber, 750);
+                } else {
+                    // Count 0: Detonate!
+                    detonateFlashbang();
+                }
+            }
+
+            // Initial delay before start countdown
+            setTimeout(showNextNumber, 300);
+        }
+
+        // Detonation Event at Count 0
+        function detonateFlashbang() {
+            isSimulating = false;
+            cancelAnimationFrame(animFrameId);
+
+            // Play Web Audio Sound Effects
+            playFlashbangSound();
+
+            // Try playing background video inside flash overlay
+            flashVideo.play().catch(() => {});
+
+            // Bring Flash overlay to 1.0 full opacity immediately
+            flashScreen.style.transition = 'opacity 0.02s ease-in';
+            flashScreen.style.opacity = '1.0';
+
+            // Hide Grenade Sprite while blinded
+            grenade.classList.add('hidden');
+
+            // Hold full opacity for 1.0 second
+            setTimeout(() => {
+                // Smoothly fade out over 0.5 seconds
+                flashScreen.style.transition = 'opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                flashScreen.style.opacity = '0';
+
+                // Reset state after fade completes
+                setTimeout(() => {
+                    resetToInitialState();
+                }, 550);
+            }, 1000);
+        }
+
+        // Reset Experience back to initial clean state
+        function resetToInitialState() {
+            flashVideo.pause();
+
+            // Clear Grenade position
+            grenade.style.transform = 'none';
+
+            // Re-enable and fade in "flashbang me" button
+            flashBtn.style.transition = 'opacity 0.4s ease-out, transform 0.25s ease';
+            flashBtn.style.opacity = '1';
+            flashBtn.style.pointerEvents = 'auto';
+        }
+
+        // Handle Responsive Resize
+        window.addEventListener('resize', () => {
+            floorY = window.innerHeight * 0.50 - 110;
+        });
+    </script>
+</body>
+</html>
